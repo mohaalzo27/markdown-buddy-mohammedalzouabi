@@ -1,0 +1,90 @@
+---
+title: "Documentation: sales_eda.R Script"
+author: "Mohammed Al Zouabi"
+date: "2026-10-26"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "#>")
+```
+
+# Purpose
+
+This R Markdown file documents the `sales_eda.R` script. The script performs exploratory data analysis on a synthetic retail sales dataset. It loads the data, handles basic cleaning, produces summary statistics by region and category, and generates visualizations to support quick insights.
+
+# Inputs
+
+- File path to the synthetic CSV (`data/synthetic_sales.csv`)
+- Required packages: tidyverse and lubridate
+
+Example data structure (synthetic columns):
+
+- `date` — character or date (YYYY-MM-DD)
+- `region` — character (e.g., North, South, East, West)
+- `category` — character (e.g., Electronics, Clothing, Home)
+- `sales_amount` — numeric
+- `units` — integer
+
+# Outputs
+
+- Cleaned tibble ready for analysis
+- Summary table of total sales by category
+- ggplot2 bar chart of sales by category
+- Optional monthly trend line chart
+
+# Code Examples
+
+## Load and Clean Data
+
+```{r load-clean, eval=FALSE}
+library(tidyverse)
+library(lubridate)
+
+sales <- read_csv("data/synthetic_sales.csv") %>%%
+  mutate(date = ymd(date)) %>%%
+  filter(!is.na(sales_amount), sales_amount > 0) %>%%
+  mutate(
+    month = floor_date(date, "month"),
+    region = factor(region)
+  )
+```
+
+## Summarize by Category
+
+```{r summarize, eval=FALSE}
+category_summary <- sales %>%%
+  group_by(category) %>%%
+  summarise(
+    total_sales = sum(sales_amount, na.rm = TRUE),
+    total_units = sum(units, na.rm = TRUE),
+    avg_sale = mean(sales_amount, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%%
+  arrange(desc(total_sales))
+
+print(category_summary)
+```
+
+## Visualize Results
+
+```{r visualize, eval=FALSE}
+ggplot(category_summary, aes(x = reorder(category, total_sales), y = total_sales)) +
+  geom_col(fill = "#2E75B6") +
+  coord_flip() +
+  labs(
+    title = "Total Sales by Product Category",
+    subtitle = "Synthetic Retail Data",
+    x = "Category",
+    y = "Total Sales Amount"
+  ) +
+  theme_minimal()
+```
+
+# Notes
+
+- All code chunks use `eval = FALSE` so the document knits without requiring the actual data file.
+- Preview this file in RStudio or Posit Cloud using the Knit button to confirm headers, lists, and code blocks render correctly.
+- The script focuses only on EDA; no modeling or predictive analysis is included.
+
+AI Assistance Declaration: I used Grok (xAI, Grok 4.7, October 26, 2026) for suggesting Markdown formatting, section organization (# Purpose, ## Inputs, ### Outputs), and example code block structure. Prompts used: "Here's my R script description. Suggest Markdown formatting and code block examples."; "Add syntax highlighting and improve section organization (e.g., # Purpose, ## Inputs, ### Outputs)."; "Is the Markdown consistent with RMarkdown best practices?" I verified by reviewing chunk options, confirming header hierarchy, and manually adjusting code examples for clarity and correctness. All final content is my responsibility.
